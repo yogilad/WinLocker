@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29709.97
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinLocker", "WinLocker\WinLocker.csproj", "{FB053DC4-DF66-4C63-91EA-8F5D5A53D878}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FB053DC4-DF66-4C63-91EA-8F5D5A53D878}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB053DC4-DF66-4C63-91EA-8F5D5A53D878}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB053DC4-DF66-4C63-91EA-8F5D5A53D878}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB053DC4-DF66-4C63-91EA-8F5D5A53D878}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0445A3C9-3845-4CB1-95B4-345B12DBB2CF}
+	EndGlobalSection
+EndGlobal
