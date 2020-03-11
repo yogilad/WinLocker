@@ -14,6 +14,14 @@ namespace WinLocker
         private readonly int[] m_suspendTimes = { 15, 30, 45, 60, 90, 120, 150, 180 };
         private readonly int[] m_lockTimes = { 3, 4, 5, 10, 15, 20, 30 };
 
+
+        const int stopStartMenuIndex = 0;
+        const int toggleAutoStartMenuIndex = 1;
+        const int IdleTimeMenuItem = 2;
+        const int suspendMenuItem = 3;
+        const int aboutMenuItemIndex = 4;
+        const int exitMenuItem = 5;
+
         public NotificationIcon()
         {
             m_components = new System.ComponentModel.Container();
@@ -41,23 +49,24 @@ namespace WinLocker
             // Initialize the context manu
             m_contextMenuItems = new MenuItem[6];
 
-            m_contextMenuItems[0] = new MenuItem(); // Enable / Disable is set by UpdateUI()
-            m_contextMenuItems[0].Click += new System.EventHandler(ContextMenu_Click);
+            m_contextMenuItems[stopStartMenuIndex] = new MenuItem(); // Enable / Disable is set by UpdateUI()
+            m_contextMenuItems[stopStartMenuIndex].Click += new System.EventHandler(ContextMenu_Click);
 
-            m_contextMenuItems[1] = new MenuItem("S&uspend for");
-            m_contextMenuItems[1].MenuItems.AddRange(suspendMenuItems.ToArray());
+            m_contextMenuItems[suspendMenuItem] = new MenuItem("Suspend for");
+            m_contextMenuItems[suspendMenuItem].MenuItems.AddRange(suspendMenuItems.ToArray());
 
-            m_contextMenuItems[2] = new MenuItem("L&ock after");
-            m_contextMenuItems[2].MenuItems.AddRange(idleMenuItems.ToArray());
+            m_contextMenuItems[IdleTimeMenuItem] = new MenuItem("Lock after");
+            m_contextMenuItems[IdleTimeMenuItem].MenuItems.AddRange(idleMenuItems.ToArray());
 
-            m_contextMenuItems[3] = new MenuItem(); // "Enable Auto Start is set by UpdateUI()
-            m_contextMenuItems[3].Click += new System.EventHandler(ContextMenu_Click); 
+            m_contextMenuItems[toggleAutoStartMenuIndex] = new MenuItem(); // "Enable Auto Start is set by UpdateUI()
+            m_contextMenuItems[toggleAutoStartMenuIndex].Click += new System.EventHandler(ContextMenu_Click); 
             
-            m_contextMenuItems[4] = new MenuItem("About");
-            m_contextMenuItems[4].MenuItems.Add(new MenuItem("Developed by Yochai Gilad (yochaig@gmail.com)"));
+            m_contextMenuItems[aboutMenuItemIndex] = new MenuItem("About");
+            //m_contextMenuItems[aboutMenuItemIndex].MenuItems.Add(new MenuItem("Developed by Yochai Gilad (yochaig@gmail.com)"));
+            m_contextMenuItems[aboutMenuItemIndex].Click += new System.EventHandler(ContextMenu_Click);
 
-            m_contextMenuItems[5] = new MenuItem("E&xit");
-            m_contextMenuItems[5].Click += new System.EventHandler(ContextMenu_Click);
+            m_contextMenuItems[exitMenuItem] = new MenuItem("Exit");
+            m_contextMenuItems[exitMenuItem].Click += new System.EventHandler(ContextMenu_Click);
 
             // Set the context menu
             m_contextMenu = new ContextMenu();
@@ -108,20 +117,25 @@ namespace WinLocker
             
             switch (menu.Index)
             {
-                case 0:
-                    Console.WriteLine("Toggle Enable Disable");
+                case stopStartMenuIndex:
+                    Console.WriteLine("Toggle Stop Start");
                     m_locker.ToggleState();
                     break; 
 
-                case 3:
+                case toggleAutoStartMenuIndex:
                     Console.WriteLine("Toggle Auto Start");
                     Common.ToggleAutoStart();
                     UpdateUI();
                     break;
 
-                case 5:
+                case exitMenuItem:
                     Console.WriteLine("Exit Application");
                     Application.Exit();
+                    break;
+
+                case aboutMenuItemIndex:
+                    var form = new AboutForm();
+                    form.Show();
                     break;
             }
         }
@@ -146,34 +160,34 @@ namespace WinLocker
             switch (m_locker.State)
             {
                 case LockerState.Active:
-                    m_contextMenuItems[0].Text = "Disa&ble";
+                    m_contextMenuItems[stopStartMenuIndex].Text = "Stop";
                     var text = $"WinLocker is Active ({Common.ToTimeRange(m_locker.LockTimeSeconds / 60)})\nDouble Click to Suspend for 1h";
                     m_notifyIcon.Text = text;
                     break;
 
                 case LockerState.Inactive:
-                    m_contextMenuItems[0].Text = "Ena&ble";
+                    m_contextMenuItems[stopStartMenuIndex].Text = "Start";
                     m_notifyIcon.Text = "WinLocker is Inactive\nDouble Click to Enable";
                     break;
 
                 case LockerState.StandBy:
-                    m_contextMenuItems[0].Text = "Ena&ble";
+                    m_contextMenuItems[stopStartMenuIndex].Text = "Start";
                     m_notifyIcon.Text = $"WinLocker is Suspended Util {m_locker.SuspendTime.ToString("HH:mm")}\nDouble Click to Enable";
                     break;
             }
 
             if (Common.AutoStartEnabled())
             {
-                m_contextMenuItems[3].Text = "Disable Auto Start";
+                m_contextMenuItems[toggleAutoStartMenuIndex].Text = "Disable Auto Start";
             }
             else
             {
-                m_contextMenuItems[3].Text = "Enable Auto Start";
+                m_contextMenuItems[toggleAutoStartMenuIndex].Text = "Enable Auto Start";
             }
 
             for (int i = 0; i < m_lockTimes.Length; i++)
             {
-                m_contextMenuItems[2].MenuItems[i].Checked = m_lockTimes[i] == m_locker.LockTimeSeconds / 60;
+                m_contextMenuItems[IdleTimeMenuItem].MenuItems[i].Checked = m_lockTimes[i] == m_locker.LockTimeSeconds / 60;
             }
         }
 
