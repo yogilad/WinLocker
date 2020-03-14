@@ -59,6 +59,7 @@ namespace WinLocker
             m_contextMenuItems[IdleTimeMenuItem].MenuItems.AddRange(idleMenuItems.ToArray());
 
             m_contextMenuItems[toggleAutoStartMenuIndex] = new MenuItem(); // "Enable Auto Start is set by UpdateUI()
+            m_contextMenuItems[toggleAutoStartMenuIndex].Text = "Auto start";
             m_contextMenuItems[toggleAutoStartMenuIndex].Click += new System.EventHandler(ContextMenu_Click); 
             
             m_contextMenuItems[aboutMenuItemIndex] = new MenuItem("About");
@@ -156,33 +157,25 @@ namespace WinLocker
         private void UpdateUI()
         {
             m_notifyIcon.Icon = ResourceLoader.GetIcon(m_locker.State);
+            m_contextMenuItems[toggleAutoStartMenuIndex].Checked = Common.AutoStartEnabled();
 
             switch (m_locker.State)
             {
                 case LockerState.Active:
-                    m_contextMenuItems[stopStartMenuIndex].Text = "Stop";
+                    m_contextMenuItems[stopStartMenuIndex].Text = "Disable";
                     var text = $"WinLocker is Active ({Common.ToTimeRange(m_locker.LockTimeSeconds / 60)})\nDouble Click to Suspend for 1h";
                     m_notifyIcon.Text = text;
                     break;
 
                 case LockerState.Inactive:
-                    m_contextMenuItems[stopStartMenuIndex].Text = "Start";
+                    m_contextMenuItems[stopStartMenuIndex].Text = "Enable";
                     m_notifyIcon.Text = "WinLocker is Inactive\nDouble Click to Enable";
                     break;
 
                 case LockerState.StandBy:
-                    m_contextMenuItems[stopStartMenuIndex].Text = "Start";
+                    m_contextMenuItems[stopStartMenuIndex].Text = "Enable";
                     m_notifyIcon.Text = $"WinLocker is Suspended Util {m_locker.SuspendTime.ToString("HH:mm")}\nDouble Click to Enable";
                     break;
-            }
-
-            if (Common.AutoStartEnabled())
-            {
-                m_contextMenuItems[toggleAutoStartMenuIndex].Text = "Disable Auto Start";
-            }
-            else
-            {
-                m_contextMenuItems[toggleAutoStartMenuIndex].Text = "Enable Auto Start";
             }
 
             for (int i = 0; i < m_lockTimes.Length; i++)
