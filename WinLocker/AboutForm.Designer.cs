@@ -40,7 +40,7 @@
             this.textBox.Name = "textBox";
             this.textBox.Size = new System.Drawing.Size(212, 137);
             this.textBox.TabIndex = 0;
-            this.textBox.Text = "\r\nWinLocker 1.0\r\n\r\nCreated by Yochai Gilad\r\n(yochaig@gmail.com)\r\n\r\nMarch 2020";
+            this.textBox.Text = "\r\nWinLocker 1.1\r\n\r\nCreated by Yochai Gilad\r\n(yochaig@gmail.com)\r\n\r\nMarch 2020";
             this.textBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // AboutForm

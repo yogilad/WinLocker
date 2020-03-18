@@ -8,19 +8,26 @@ namespace WinLocker
     class Locker
     {
         private SessionStatus m_sessionStat = new SessionStatus();
-        private const int m_timeIntervalMilliSeconds = 5000;
-        private const int m_minLockTimeSeconds = 60; 
+        private const int m_timeIntervalMilliSeconds = 1000;
+        private const int m_minLockTimeSeconds = 60;
+        private const int m_aboutToLockTime = 20;
         private int m_lockTimeSeconds = 5 * 60;
+        private bool m_aboutToLockFired = false;
         private LockerState m_state = LockerState.Active;
         private DateTime m_suspendUntil;
 
-        public event EventHandler StateChanged;
+        public event EventHandler StateChangedEvent;
+        public event EventHandler AboutToLockEvent;
 
         public class StateChangedEventArgs : EventArgs
         {
             public bool Automatic { set; get; }
         }
-        
+        public class AboutToLockEventArgs : EventArgs
+        {
+            public int Seconds { set; get; }
+        }
+
         public int LockTimeSeconds
         {
             get => m_lockTimeSeconds;
@@ -30,6 +37,8 @@ namespace WinLocker
                     m_lockTimeSeconds = value;
             }
         }
+
+        public int AboutToLockTime => m_aboutToLockTime;
 
         public DateTime SuspendTime => m_suspendUntil;
         public LockerState State => m_state;
@@ -88,7 +97,14 @@ namespace WinLocker
         {
             var args = new StateChangedEventArgs() { Automatic = automatic};
 
-            StateChanged?.Invoke(this, args);
+            StateChangedEvent?.Invoke(this, args);
+        }
+
+        private void FireAboutToLockEvent()
+        {
+            var args = new AboutToLockEventArgs() { Seconds = m_aboutToLockTime };
+
+            AboutToLockEvent?.Invoke(this, args);
         }
 
         public void RunAsync()
@@ -138,10 +154,23 @@ namespace WinLocker
                     var idleTime = InputTimer.GetInputIdleTime();
 
                     Console.WriteLine("Desktop is idle for {0}", idleTime.ToString());
-                    if (idleTime.TotalSeconds >= m_lockTimeSeconds)
+                    if (idleTime.TotalSeconds >= m_lockTimeSeconds - m_aboutToLockTime)
                     {
-                        Console.WriteLine("Locking Desktop");
-                        SessionStatus.LockWorkStation();
+                        if (!m_aboutToLockFired)
+                        {
+                            FireAboutToLockEvent();
+                            m_aboutToLockFired = true;
+                        }
+
+                        if (idleTime.TotalSeconds >= m_lockTimeSeconds)
+                        {
+                            Console.WriteLine("Locking Desktop");
+                            SessionStatus.LockWorkStation();
+                        }
+                    }
+                    else 
+                    {
+                        m_aboutToLockFired = false;
                     }
                 }
 

@@ -4,9 +4,9 @@ using System.Windows.Forms;
 
 namespace WinLocker
 {
-    public class NotificationIcon : IDisposable 
+    public class NotificationIcon : IDisposable
     {
-        private System.ComponentModel.IContainer m_components; 
+        private System.ComponentModel.IContainer m_components;
         private NotifyIcon m_notifyIcon;
         private ContextMenu m_contextMenu;
         private Locker m_locker;
@@ -60,8 +60,8 @@ namespace WinLocker
 
             m_contextMenuItems[toggleAutoStartMenuIndex] = new MenuItem(); // "Enable Auto Start is set by UpdateUI()
             m_contextMenuItems[toggleAutoStartMenuIndex].Text = "Auto start";
-            m_contextMenuItems[toggleAutoStartMenuIndex].Click += new System.EventHandler(ContextMenu_Click); 
-            
+            m_contextMenuItems[toggleAutoStartMenuIndex].Click += new System.EventHandler(ContextMenu_Click);
+
             m_contextMenuItems[aboutMenuItemIndex] = new MenuItem("About");
             //m_contextMenuItems[aboutMenuItemIndex].MenuItems.Add(new MenuItem("Developed by Yochai Gilad (yochaig@gmail.com)"));
             m_contextMenuItems[aboutMenuItemIndex].Click += new System.EventHandler(ContextMenu_Click);
@@ -89,7 +89,8 @@ namespace WinLocker
             Common.LoadSettings(out idleMinutes);
             m_locker = new Locker();
             m_locker.LockTimeSeconds = idleMinutes * 60;
-            m_locker.StateChanged += LockerStateChangedHandler;
+            m_locker.StateChangedEvent += LockerStateChangedEventHandler;
+            m_locker.AboutToLockEvent += AboutToLockEventHandler;
             m_locker.RunAsync();
 
             // Dispaly the notification icon
@@ -115,13 +116,13 @@ namespace WinLocker
         private void ContextMenu_Click(object Sender, EventArgs e)
         {
             var menu = Sender as MenuItem;
-            
+
             switch (menu.Index)
             {
                 case stopStartMenuIndex:
                     Console.WriteLine("Toggle Stop Start");
                     m_locker.ToggleState();
-                    break; 
+                    break;
 
                 case toggleAutoStartMenuIndex:
                     Console.WriteLine("Toggle Auto Start");
@@ -184,9 +185,19 @@ namespace WinLocker
             }
         }
 
-        public void LockerStateChangedHandler(object Sender, EventArgs args)
+        public void LockerStateChangedEventHandler(object Sender, EventArgs args)
         {
             UpdateUI();
+        }
+
+        public void AboutToLockEventHandler(object Sender, EventArgs args)
+        {
+            var time = args as Locker.AboutToLockEventArgs;
+
+            m_notifyIcon.BalloonTipTitle= "WinLocker";
+            m_notifyIcon.BalloonTipText = $"Desktop will lock in {time.Seconds} seconds!";
+            m_notifyIcon.BalloonTipIcon = ToolTipIcon.None;
+            m_notifyIcon.ShowBalloonTip(time.Seconds*1000);
         }
     }
 }
