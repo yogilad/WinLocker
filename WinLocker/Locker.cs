@@ -26,6 +26,7 @@ namespace WinLocker
         public class AboutToLockEventArgs : EventArgs
         {
             public int Seconds { set; get; }
+            public bool ShowMessage { set; get; }
         }
 
         public int LockTimeSeconds
@@ -100,11 +101,15 @@ namespace WinLocker
             StateChangedEvent?.Invoke(this, args);
         }
 
-        private void FireAboutToLockEvent()
+        private void FireAboutToLockEvent(bool show)
         {
-            var args = new AboutToLockEventArgs() { Seconds = m_aboutToLockTime };
+            if (m_aboutToLockFired != show)
+            {
+                var args = new AboutToLockEventArgs() { Seconds = m_aboutToLockTime, ShowMessage = show };
 
-            AboutToLockEvent?.Invoke(this, args);
+                AboutToLockEvent?.Invoke(this, args);
+                m_aboutToLockFired = show;
+            }
         }
 
         public void RunAsync()
@@ -158,8 +163,7 @@ namespace WinLocker
                     {
                         if (!m_aboutToLockFired)
                         {
-                            FireAboutToLockEvent();
-                            m_aboutToLockFired = true;
+                            FireAboutToLockEvent(true);
                         }
 
                         if (idleTime.TotalSeconds >= m_lockTimeSeconds)
@@ -170,7 +174,7 @@ namespace WinLocker
                     }
                     else 
                     {
-                        m_aboutToLockFired = false;
+                        FireAboutToLockEvent(false);
                     }
                 }
 

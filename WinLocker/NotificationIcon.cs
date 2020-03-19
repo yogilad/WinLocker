@@ -192,12 +192,21 @@ namespace WinLocker
 
         public void AboutToLockEventHandler(object Sender, EventArgs args)
         {
-            var time = args as Locker.AboutToLockEventArgs;
+            var evArgs = args as Locker.AboutToLockEventArgs;
 
-            m_notifyIcon.BalloonTipTitle= "WinLocker";
-            m_notifyIcon.BalloonTipText = $"Desktop will lock in {time.Seconds} seconds!";
-            m_notifyIcon.BalloonTipIcon = ToolTipIcon.None;
-            m_notifyIcon.ShowBalloonTip(time.Seconds*1000);
+            if (evArgs.ShowMessage)
+            {
+                m_notifyIcon.BalloonTipTitle = "WinLocker";
+                m_notifyIcon.BalloonTipText = $"Desktop will lock in {evArgs.Seconds} seconds!";
+                m_notifyIcon.BalloonTipIcon = ToolTipIcon.None;
+                m_notifyIcon.ShowBalloonTip(evArgs.Seconds * 1000);
+            }
+            else
+            {
+                // This is a hack, but there does not seem to be another way to progrematically dimiss the Balloon Tip
+                m_notifyIcon.Visible = false;
+                m_notifyIcon.Visible = true;
+            }
         }
     }
 }
