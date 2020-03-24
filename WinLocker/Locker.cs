@@ -12,7 +12,7 @@ namespace WinLocker
         private const int m_minLockTimeSeconds = 60;
         private const int m_aboutToLockTime = 20;
         private int m_lockTimeSeconds = 5 * 60;
-        private bool m_aboutToLockFired = false;
+        private bool m_aboutToLockFiredState = false;
         private LockerState m_state = LockerState.Active;
         private DateTime m_suspendUntil;
 
@@ -101,14 +101,14 @@ namespace WinLocker
             StateChangedEvent?.Invoke(this, args);
         }
 
-        private void FireAboutToLockEvent(bool show)
+        private void FireAboutToLockEventIfStateChanged(bool showState)
         {
-            if (m_aboutToLockFired != show)
+            if (m_aboutToLockFiredState != showState)
             {
-                var args = new AboutToLockEventArgs() { Seconds = m_aboutToLockTime, ShowMessage = show };
+                var args = new AboutToLockEventArgs() { Seconds = m_aboutToLockTime, ShowMessage = showState };
 
                 AboutToLockEvent?.Invoke(this, args);
-                m_aboutToLockFired = show;
+                m_aboutToLockFiredState = showState;
             }
         }
 
@@ -161,10 +161,7 @@ namespace WinLocker
                     Console.WriteLine("Desktop is idle for {0}", idleTime.ToString());
                     if (idleTime.TotalSeconds >= m_lockTimeSeconds - m_aboutToLockTime)
                     {
-                        if (!m_aboutToLockFired)
-                        {
-                            FireAboutToLockEvent(true);
-                        }
+                        FireAboutToLockEventIfStateChanged(true);
 
                         if (idleTime.TotalSeconds >= m_lockTimeSeconds)
                         {
@@ -174,7 +171,7 @@ namespace WinLocker
                     }
                     else 
                     {
-                        FireAboutToLockEvent(false);
+                        FireAboutToLockEventIfStateChanged(false);
                     }
                 }
 
